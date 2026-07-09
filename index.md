@@ -47,11 +47,9 @@ For your second milestone, explain what you've worked on since your previous mil
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/CaCazFBhYKs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-For your first milestone, describe what your project is and how you plan to build it. You can include:
-- An explanation about the different components of your project and how they will all integrate together
-- Technical progress you've made so far
-- Challenges you're facing and solving in your future milestones
-- What your plan is to complete your project
+
+The project is Sapcecraft motion simulator, where a model spacecraft will be attatched to strings, which can be tightened or loosed to control the orientation of the craft in three dimensions. The main components of teh project include the PVC frame, motors and circuitry to control the strings with buttons, and 3D printed parts such as the motor housing, the dowel to wrap the tring around, etc. So far, I was able to build the frame as well as complete the initial versions of the circuitry and code. In addition, I have CADed printed the motor, dowel, and model spacecraft and assemble them together to complete the physcial aspsects of the project. One of the biggest challenges I've faced on  eproject are the relatively slwo production of 3D printed parts that have slowed the process down. In addtition, this has been my first time using an arduino, and I had to learn how to use breadboards, assemble circuits, and code in C++. In teh next few days, I plan to build programs to automatically move the spacecraft to diffrent positions across the frame, as well as perform tasks such as docking, landing, and orbiting. Then, I plan to introduce modifications, such as manual joystick control of the aircraft rather then teh individaul strings, as well as adding one or two more motors for more axises of control. 
+
 
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
