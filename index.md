@@ -57,14 +57,67 @@ The project is Spacecraft motion simulator, where a model spacecraft will be att
 Here's where you'll put your code. The syntax below places it into a block of code. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize it to your project needs. 
 
 ```c++
+#include <Servo.h>
+
+Servo one;
+Servo two;
+Servo thr;
+
+int f = 180; 
+int b =  0 ; 
+int s = 90 ;
+
+
+
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  Serial.println("Hello World!");
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
+  pinMode(5, INPUT_PULLUP);
+  pinMode(6, INPUT_PULLUP);
+  pinMode(7, INPUT_PULLUP);
+  one.attach(8); 
+  two.attach(9); 
+  thr.attach(10); 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  bool onef = !digitalRead(2); 
+  bool oneb = !digitalRead(3); 
+  bool twof = !digitalRead(4); 
+  bool twob = !digitalRead(5); 
+  bool thrf = !digitalRead(6); 
+  bool thrb = !digitalRead(7);
+
+  if (onef && !oneb) {
+    one.write(f); 
+  } else if (!onef && oneb) {
+    one.write(b); 
+  }else {
+    one.write(s); 
+  } 
+  
+  
+  if (twof && !twob){
+    two.write (f); 
+  } else if (!twof && twob) {
+    two.write (b); 
+  }else{ 
+    two.write(s);
+  }
+  
+  
+  if (thrf && !thrb){
+    thr.write(f); 
+  } else if (!thrf && thrb){
+    thr.write(b); 
+  }else{ 
+    thr.write(s); 
+  } 
+  
+  
+  
+}
 
 }
 ```
