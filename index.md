@@ -57,69 +57,202 @@ The project is Spacecraft motion simulator, where a model spacecraft will be att
 Here's where you'll put your code. The syntax below places it into a block of code. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize it to your project needs. 
 
 ```c++
+//made 3 servo objects
 #include <Servo.h>
+Servo sv1; 
+Servo sv2; 
+Servo sv3;
+Servo*motors[3] = {&sv1, &sv2, &sv3}; 
 
-Servo one;
-Servo two;
-Servo thr;
+//made 3d vector object 
+struct Vec3 {
+  float x,y,z;
+  };
 
-int f = 180; 
-int b =  0 ; 
-int s = 90 ;
+//extablish forwar and backward speed s
+int fwd = 180 ;
+int bck = 0 ;
+int stop = 90 ;
+
+//made fixed anchors ( IRL screw eyes)(mm)
+const Vec3 Ancr1 = {0,0,0}; 
+const Vec3 Ancr2 = {165,286, 0}; 
+const Vec3 Ancr3 = {-165, 286, 0}; 
+
+
+
+//**************CHANGE****************
+//decalres starting position
+Vec3 startPos = {0,0,0};
+//*****************CHANGE**********
+
+
+
+//mm of string wrapped by dowel per sec - needs to be calibrated later individually
+float mmPerSec[3] = {40,40,40}; 
+
+//variable(per motor - hence 3) storing how long eahc string is.
+float currentLength[3]; 
+
+//distance fromula 
+float dist (Vec3 A, Vec3 B) { 
+  float rx = A.x - B.x , ry = A.y-B.y , rz = A.z - B.z ; 
+  return sqrt(rx*rx + ry*ry + rz*rz );
+}
+
+//struct representing motor's in progress move
+struct motorState {
+  bool active; 
+  unsigned long startTime; 
+  unsigned long duration; 
+  float mmStart; 
+  float deltaMm;
+};
+motorState moves[3]; 
+
+//starting a timed motor movement (desired coordinates-> length fo string-> time motor needs to spin)
+ void Movecable (int i, float deltMm) { 
+  if (fabs(deltaMm)<0.4) return; 
+  int dir = (deltaMm > 0 ) ? fwd : bck ; //********MIGHT NEED TO CHANGE DEPENDING ON TEST ********
+  moves[i].mmStart = currentLength[i]; 
+  moves[i].deltMm = deltMm;
+  moves[i].startTime = millis();
+  moves[i].active = true; 
+  moves[i].duration = (unsigned long)(fabs(deltaMm)/ mmPerSec[i] * 1000.0);  
+  motors[i]->write(dir);
+ }
+
+// finishes any cable mvoememnt if time has elapsed
+void UpdateCableMoves() {
+  for (int i = 0; i < 3; i++) {
+    if (!moves[i].active) continue;
+    if (millis() - moves[i].startTime >= moves[i].duration) {
+      currentLength[i] = moves[i].mmStart + moves[i].deltaMm;
+      motors[i]->write(stop);
+      moves[i].active = false;
+    }
+  }
+}
+
+// ( Inverse kinematics ? ??)function to translate 3d point request into movement for each string. 
+void MoveTo ( Vec3 Target ) { 
+  float targetlength[3]; 
+  targetlength[0] = dist(Ancr1 , Target); 
+  targetlength[1] = dist(Ancr2, Target);
+  targetlength[2] = dist(Ancr3, Target);
+  Movecable(0, (targetlength[0]-currentLength[0]));
+  Movecable(1, (targetlength[1]-currentLength[1]));
+  Movecable(2, (targetlength[2]-currentLength[2]));
+}
+
+//defines moving vs not moving (for imput handling, manual control)
+bool IsMoving() {
+    for(int i=0;i<3;i++)
+        if(moves[i].active || manualStrngCtrl[i].active)
+            return true;
+
+    return false;
+}
+
+// tracks an in-progress manual button press, per motor
+struct ManualState {
+  bool active;
+  unsigned long startTime;
+  int dir;
+};
+
+ManualState manualStrngCtrl[3];
+
+const int windPin[3]   = {2, 4, 6};
+const int unwindPin[3] = {3, 5, 7};
+
+//function fro manually controlling teh rtinsg via buttons while tracking string length. 
+void ManualStringControl() {
+  for (int i = 0; i < 3; i++) {
+    bool windPressed   = !digitalRead(windPin[i]);
+    bool unwindPressed = !digitalRead(unwindPin[i]);
+
+    int wantDir;
+    if (windPressed && !unwindPressed) wantDir = bck;      // shortens string
+    else if (!windPressed && unwindPressed) wantDir = fwd; // lengthens string
+    else wantDir = stop;
+
+    if (wantDir != stop) {
+      moves[i].active=false;
+      if (!manualStrngCtrl[i].active || manualStrngCtrl[i].dir != wantDir) {
+        manualStrngCtrl[i].active = true;
+        manualStrngCtrl[i].startTime = millis();
+        manualStrngCtrl[i].dir = wantDir;
+        motors[i]->write(wantDir);
+      }
+    } else if (manualStrngCtrl[i].active) {
+      float elapsedSec = (millis() - manualStrngCtrl[i].startTime) / 1000.0;
+      float delta = elapsedSec * mmPerSec[i];
+      currentLength[i] += (manualStrngCtrl[i].dir == fwd) ? delta : -delta;
+      manualStrngCtrl[i].active = false;
+      motors[i]->write(stop);
+    }
+  }
+}
+
+//INput Handling (recieves the XYZ coordinates)
+void ReadSerialCommand() {
+  if (!Serial.available()) return;
+  String line = Serial.readStringUntil('\n');
+
+  int c1 = line.indexOf(',');
+  int c2 = line.indexOf(',', c1 + 1);
+  if (c1 == -1 || c2 == -1) {
+    Serial.println("ERR: expected format x,y,z");
+    return;
+  }
+
+  if (IsMoving()) {
+    Serial.println("ERR: still moving, command ignored");
+    return;
+  }
+
+  float x = line.substring(0, c1).toFloat();
+  float y = line.substring(c1 + 1, c2).toFloat();
+  float z = line.substring(c2 + 1).toFloat();
+
+  MoveTo({x, y, z});
+  Serial.println("ZOomin");
+}
 
 
 
 void setup() {
+ Serial.begin(9600);
+
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
   pinMode(5, INPUT_PULLUP);
   pinMode(6, INPUT_PULLUP);
   pinMode(7, INPUT_PULLUP);
-  one.attach(8); 
-  two.attach(9); 
-  thr.attach(10); 
+  sv1.attach(8);
+  sv2.attach(9);
+  sv3.attach(10);
+
+  currentLength[0] = dist(Ancr1 startPos);
+  currentLength[1] = dist(Ancr2, startPos);
+  currentLength[2] = dist(Ancr3, startPos);
+
+  Serial.println(currentLength[0]);
+  Serial.println(currentLength[1]);
+  Serial.println(currentLength[2]);
 }
+
+
 
 void loop() {
-  bool onef = !digitalRead(2); 
-  bool oneb = !digitalRead(3); 
-  bool twof = !digitalRead(4); 
-  bool twob = !digitalRead(5); 
-  bool thrf = !digitalRead(6); 
-  bool thrb = !digitalRead(7);
-
-  if (onef && !oneb) {
-    one.write(f); 
-  } else if (!onef && oneb) {
-    one.write(b); 
-  }else {
-    one.write(s); 
-  } 
-  
-  
-  if (twof && !twob){
-    two.write (f); 
-  } else if (!twof && twob) {
-    two.write (b); 
-  }else{ 
-    two.write(s);
-  }
-  
-  
-  if (thrf && !thrb){
-    thr.write(f); 
-  } else if (!thrf && thrb){
-    thr.write(b); 
-  }else{ 
-    thr.write(s); 
-  } 
-  
-  
-  
+  // put your main code here, to run repeatedly:
+  ManualStringControl();
+  ReadSerialCommand();
+  UpdateCableMoves();
 }
 
-}
 ```
 
 # Bill of Materials
