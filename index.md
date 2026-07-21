@@ -15,7 +15,7 @@ You should comment out all portions of your portfolio that you have not complete
 
 ![Headstone Image](logo.svg)
   
-# Final Milestone
+# Modifications
 
 **Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
 
@@ -26,6 +26,12 @@ For your final milestone, explain the outcome of your project. Key details to in
 - What your biggest challenges and triumphs were at BSE
 - A summary of key topics you learned about
 - What you hope to learn in the future after everything you've learned at BSE
+
+I made several modificatiosn after the completion of my base project; I added a 4th motor to expand the range of motion of the payload, attatched a joystick and buttons to manually control the payload with, and printed a box to house the circuitry as well as the joystick and buttons. By far teh biggest challenge was the error optimization. Previously with only 3 strings, the slight errors in the length of strings were not as apparent, since the directions of thw strings did not conflict with each other. However, since the strings are positioned opposite to one another, sligth differenced in wind/unwind distances could result in excess tension and damage to the model. The process of measuring each motor's RPM, wind length, response to torque, etc was a laborious yet rewarding process, as I ultimately got the simulator to mvoe much more smoothly. 
+
+BSE has completely changed the trajectory of my engineering journey for the better. Through various trial and error, I learned how to sodler, work with electronics, and code. I learned the steps of creating a project, from preparation to testing to presenting a final product. Most importantly, I leanred teh importance of keeping track of my own progress. 
+
+I hope to use my experience in BSE as a steppng stone for furtehr projects to come. Currently my goal is to starting making my own quadcopter back home, with motion control and user tracking embedded inside. I hope to keep making projects, learn to create leager ones in college, and become a successful engineer in the future. 
 
 
 
