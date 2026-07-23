@@ -1,11 +1,9 @@
 # SpaceCraft Motion Simulator
 What if you could simulate the biggest moments of space exploration right on your desktop? This project uses a string-motor mechanism, PVC-built frame, and hundreds of lines of code to simulate three-dimension motion of a 3D-printed payload. It can be controleld by either inputting 3D coordinates or controlling the craft with a joystick. 
 
-You should comment out all portions of your portfolio that you have not completed yet, as well as any instructions:
-```HTML 
-<!--- This is an HTML comment in Markdown -->
-<!--- Anything between these symbols will not render on the published site -->
-```
+
+
+
 
 | **Engineer** | **School** | **Area of Interest** | **Grade** |
 |:--:|:--:|:--:|:--:|
