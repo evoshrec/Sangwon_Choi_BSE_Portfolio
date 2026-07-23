@@ -63,32 +63,39 @@ The project is Spacecraft motion simulator, where a model spacecraft will be att
 Here's where you'll put your code. The syntax below places it into a block of code. Follow the guide [here]([url](https://www.markdownguide.org/extended-syntax/)) to learn how to customize it to your project needs. 
 
 ```c++
-//made 4 servo objects
+//made 3 servo objects
 #include <Servo.h>
 #include <math.h>
 
-Servo sv1; 
-Servo sv2; 
+
+Servo sv1;
+Servo sv2;
 Servo sv3;
 Servo sv4;
 
-Servo* motors[4] = {&sv1, &sv2, &sv3, &sv4}; 
 
-//made 3d vector object 
+Servo* motors[4] = {&sv1, &sv2, &sv3, &sv4};
+
+
+//made 3d vector object
 struct Vec3 {
   float x,y,z;
   };
 
+
 //extablish forwar and backward speed s
-int fwd = 135 ;
+int fwd = 180 ;
 int bck = 45 ;
 int stop = 90 ;
 
+
 //made fixed anchors ( IRL screw eyes)(mm)
-const Vec3 Ancr1 = {0,0,0}; 
-const Vec3 Ancr2 = {302,0,0}; 
-const Vec3 Ancr3 = {0,302,0}; 
+const Vec3 Ancr1 = {0,0,0};
+const Vec3 Ancr2 = {302,0,0};
+const Vec3 Ancr3 = {0,302,0};
 const Vec3 Ancr4 = {302,302,0};
+
+
 
 
 Vec3 attachOffset[4] = {
@@ -99,7 +106,16 @@ Vec3 attachOffset[4] = {
 };
 
 
-Vec3 startPos = {151, 151, -25};
+
+
+Vec3 startPos = {21.6505,16.3125,0};
+
+
+// homing reference: a== physical position that craft can return to ( prevent erros from stacking by homing at a known location. )
+// 
+Vec3 homePos = {21.6505, 16.3125, 0}; 
+float HOME_LENGTH[4] = {5, 249.1, 260.1, 363.9};  
+
 
 //constarisnt ( so payload doenst try to go outside frame)
 const float FRAME_MIN_X = 0;
@@ -109,38 +125,48 @@ const float FRAME_MAX_Y = 302;
 const float FRAME_MIN_Z = -250;    // can't go above/at anchor height
 const float FRAME_MAX_Z = 0;
 
-//mm of string wrapped by dowel per sec - calibrated using slow mo camera and shi
-float mmPerSec[4] = {56.3,57.0,58.5,55.8}; 
+
+//mm of string wrapped by dowel per sec - needs to be calibrated later 0,
+float mmPerSec[4] = {58.5,57.0,57,55.5};
+
 
 //variable(per motor - hence 3) storing how long eahc string is.
-float currentLength[4]; 
+float currentLength[4];
 
-//distance fromula 
-float dist (Vec3 A, Vec3 B) { 
-  float rx = A.x - B.x , ry = A.y-B.y , rz = A.z - B.z ; 
+
+//distance fromula
+float dist (Vec3 A, Vec3 B) {
+  float rx = A.x - B.x , ry = A.y-B.y , rz = A.z - B.z ;
   return sqrt(rx*rx + ry*ry + rz*rz );
 }
 
+
 // given the payload's center target, compute the required length for
 // each of the 4 strings (accounting for the corner offsets above).
-// Shared by setup() and MoveTo() 
+// Shared by setup() and MoveTo() so there's one source of truth.
 void ComputeTargetLengths(Vec3 target, float* outLengths) {
   Vec3 attachPoint;
+
 
   attachPoint = { target.x + attachOffset[0].x, target.y + attachOffset[0].y, target.z + attachOffset[0].z };
   outLengths[0] = dist(Ancr1, attachPoint);
 
+
   attachPoint = { target.x + attachOffset[1].x, target.y + attachOffset[1].y, target.z + attachOffset[1].z };
   outLengths[1] = dist(Ancr2, attachPoint);
 
+
   attachPoint = { target.x + attachOffset[2].x, target.y + attachOffset[2].y, target.z + attachOffset[2].z };
   outLengths[2] = dist(Ancr3, attachPoint);
+
 
   attachPoint = { target.x + attachOffset[3].x, target.y + attachOffset[3].y, target.z + attachOffset[3].z };
   outLengths[3] = dist(Ancr4, attachPoint);
 }
 
-//makes sure paylaod does not go outside frame 
+
+// checks whether ALL FOUR attach corners (not just the center) stay inside
+// the frame -- a corner can hit the boundary before the center does.
 bool InBounds(Vec3 target) {
   for (int i = 0; i < 4; i++) {
     float ax = target.x + attachOffset[i].x;
@@ -152,29 +178,33 @@ bool InBounds(Vec3 target) {
   return true;
 }
 
+
 //struct representing motor's in progress move
 struct motorState {
-  bool active; 
-  unsigned long startTime; 
-  unsigned long duration; 
-  float mmStart; 
+  bool active;
+  unsigned long startTime;
+  unsigned long duration;
+  float mmStart;
   float deltMm;
 };
 
-motorState moves[4]; 
+
+motorState moves[4];
+
 
 //starting a timed motor movement (desired coordinates-> length fo string-> time motor needs to spin)
-void Movecable (int i, float deltMm) { 
-  if (deltMm == 0) return; 
-  int dir = (deltMm > 0 ) ? bck : fwd; 
-  
-  moves[i].mmStart = currentLength[i]; 
+void Movecable (int i, float deltMm) {
+  if (deltMm == 0) return;
+  int dir = (deltMm > 0 ) ? bck : fwd;
+ 
+  moves[i].mmStart = currentLength[i];
   moves[i].deltMm = deltMm;
   moves[i].startTime = millis();
-  moves[i].active = true; 
+  moves[i].active = true;
   moves[i].duration = (unsigned long)(fabs(deltMm)/ mmPerSec[i] * 1000.0);  
   motors[i]->write(dir);
 }
+
 
 // finishes any cable mvoememnt if time has elapsed
 void UpdateCableMoves() {
@@ -188,20 +218,30 @@ void UpdateCableMoves() {
   }
 }
 
-// ( Inverse kinematics ? ??)function to translate 3d point request into movement for each string. 
-void MoveTo ( Vec3 Target ) { 
-  float targetlength[4];
-  ComputeTargetLengths(Target, targetlength);
 
-  Movecable(0, (targetlength[0]-currentLength[0]));
-  Movecable(1, (targetlength[1]-currentLength[1]));
-  Movecable(2, (targetlength[2]-currentLength[2]));
-  Movecable(3, (targetlength[3]-currentLength[3]));
+// ( Inverse kinematics ? ??)function to translate 3d point request into movement for each string.
+void MoveTo ( Vec3 Target ) {
+  float targetLength[4];
+  ComputeTargetLengths(Target, targetLength);
+
+
+  Movecable(0, (targetLength[0]-currentLength[0]));
+  Movecable(1, (targetLength[1]-currentLength[1]));
+  Movecable(2, (targetLength[2]-currentLength[2]));
+  Movecable(3, (targetLength[3]-currentLength[3]));
 }
-// uses tarcked current position as starting p[oint of jouystick jog
+
+
+
+
+// last commanded payload center -- our tracked position, used as the
+// jog's starting point since we have no direct position feedback
 Vec3 currentTarget;
 
-//checks if in bounds etc ( shared with both manual jog and coordinate oriented movement)
+
+// checks bounds, issues the move, and keeps currentTarget in sync.
+// Shared by serial XYZ commands and joystick jogging so there's one
+// path for "try to move the payload somewhere."
 bool TryMoveTo(Vec3 target) {
   if (!InBounds(target)) return false;
   MoveTo(target);
@@ -209,30 +249,36 @@ bool TryMoveTo(Vec3 target) {
   return true;
 }
 
-//joystick manual jog control thingy 
+
+//joystick manual control
 const int JOY_X_PIN = A0;
 const int JOY_Y_PIN = A1;
-const int BUTTON_UP_PIN   = 2; // verify this actually raises the payload
-const int BUTTON_DOWN_PIN = 3; // verify this actually lowers the payload
+const int BUTTON_UP_PIN   = 3; // 
+const int BUTTON_DOWN_PIN = 2; // 
 
-const int JOY_CENTER   = 512; // rest value - prevent stick drift 
+
+const int JOY_CENTER   = 512; // typical joystick module rest value, verify with a raw print if jog drifts on its own
 const int JOY_DEADZONE = 60;  // ignore small drift around center
-const float JOG_STEP_XY = 5.0; // mm per jog step ( can be adjusted, but bigger-> choppier motion)
+const float JOG_STEP_XY = 5.0; // mm per jog step -- bigger = faster but choppier
 const float JOG_STEP_Z  = 5.0; // mm per jog step
 
+
 void JoystickControl() {
-  if (IsMoving()) return; // wait for the current step to finish before sending the next to make sure no overlap
+  if (IsMoving()) return; // 
+
 
   int jx = analogRead(JOY_X_PIN) - JOY_CENTER;
   int jy = analogRead(JOY_Y_PIN) - JOY_CENTER;
   bool up   = !digitalRead(BUTTON_UP_PIN);
   bool down = !digitalRead(BUTTON_DOWN_PIN);
 
+
   Vec3 target = currentTarget;
   bool wantsMove = false;
 
+
   if (abs(jx) > JOY_DEADZONE) {
-    target.x += (jx > 0) ? JOG_STEP_XY : -JOG_STEP_XY;
+    target.x += (jx > 0) ? -JOG_STEP_XY : JOG_STEP_XY;
     wantsMove = true;
   }
   if (abs(jy) > JOY_DEADZONE) {
@@ -247,10 +293,13 @@ void JoystickControl() {
     wantsMove = true;
   }
 
+
   if (wantsMove && !TryMoveTo(target)) {
     Serial.println("edge reached");
   }
 }
+
+
 
 
 //defines moving vs not moving (for imput handling, manual control)
@@ -259,15 +308,20 @@ bool IsMoving() {
         if(moves[i].active)
             return true;
 
+
     return false;
 }
+
+
 
 
 //INput Handling (recieves the XYZ coordinates)
 void ReadSerialCommand() {
   if (!Serial.available()) return;
 
+
   String line = Serial.readStringUntil('\n');
+
 
   if (line == "status") {
     Serial.print("L0: "); Serial.println(currentLength[0]);
@@ -277,24 +331,59 @@ void ReadSerialCommand() {
     return;
   }
 
+
+  if (line == "home") {
+    if (IsMoving()) {
+      Serial.println("still moving, cannot home");
+      return;
+    }
+    // trusts the physical measurement over accumulated tracking --
+    // only send this once the payload is actually AT homePos
+    currentLength[0] = HOME_LENGTH[0];
+    currentLength[1] = HOME_LENGTH[1];
+    currentLength[2] = HOME_LENGTH[2];
+    currentLength[3] = HOME_LENGTH[3];
+    currentTarget = homePos;
+    Serial.println("Homed");
+    return;
+  }
+  
+  if (line == "startpos") {
+    if (IsMoving()) {
+      Serial.println("still moving, command ignored");
+      return;
+    }
+    if (!TryMoveTo(startPos)) {
+      Serial.println("coordinate out of frame");
+    } else {
+      Serial.println("Moving to start");
+    }
+    return;
+  }
+
   int c1 = line.indexOf(',');
   int c2 = line.indexOf(',', c1 + 1);
+
 
   if (c1 == -1 || c2 == -1) {
     Serial.println("Expects format x,y,z");
     return;
   }
 
+
   if (IsMoving()) {
     Serial.println("still moving, command ignored");
     return;
   }
 
+
   float x = line.substring(0, c1).toFloat();
   float y = line.substring(c1 + 1, c2).toFloat();
   float z = line.substring(c2 + 1).toFloat();
 
+
   Vec3 target = {x, y, z};
+
 
   if (!TryMoveTo(target)) {
     Serial.println("coordinate out of frame");
@@ -304,11 +393,18 @@ void ReadSerialCommand() {
 }
 
 
+
+
+
+
 void setup() {
  Serial.begin(9600);
 
+
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
+
+
 
 
   sv1.attach(10);
@@ -317,8 +413,11 @@ void setup() {
   sv4.attach(13);
 
 
+
+
   ComputeTargetLengths(startPos, currentLength);
   currentTarget = startPos;
+
 
   Serial.println(currentLength[0]);
   Serial.println(currentLength[1]);
@@ -328,11 +427,18 @@ void setup() {
 
 
 
+
+
+
 void loop() {
   JoystickControl();
   ReadSerialCommand();
   UpdateCableMoves();
 }
+
+
+
+
 ```
 
 # Bill of Materials
