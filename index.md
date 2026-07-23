@@ -16,14 +16,6 @@ What if you could simulate the biggest moments of space exploration right on you
 # Modifications
 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/F7M7imOVGug" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-
-For your final milestone, explain the outcome of your project. Key details to include are:
-- What you've accomplished since your previous milestone
-- What your biggest challenges and triumphs were at BSE
-- A summary of key topics you learned about
-- What you hope to learn in the future after everything you've learned at BSE
-
 I made several modificatiosn after the completion of my base project; I added a 4th motor to expand the range of motion of the payload, attatched a joystick and buttons to manually control the payload with, and printed a box to house the circuitry as well as the joystick and buttons. By far teh biggest challenge was the error optimization. Previously with only 3 strings, the slight errors in the length of strings were not as apparent, since the directions of thw strings did not conflict with each other. However, since the strings are positioned opposite to one another, sligth differenced in wind/unwind distances could result in excess tension and damage to the model. The process of measuring each motor's RPM, wind length, response to torque, etc was a laborious yet rewarding process, as I ultimately got the simulator to mvoe much more smoothly. 
 
 BSE has completely changed the trajectory of my engineering journey for the better. Through various trial and error, I learned how to sodler, work with electronics, and code. I learned the steps of creating a project, from preparation to testing to presenting a final product. Most importantly, I leanred teh importance of keeping track of my own progress. 
