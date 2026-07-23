@@ -90,7 +90,7 @@ Vec3 attachOffset[4] = {
 Vec3 startPos = {21.6505,16.3125,0};
 
 
-// homing reference: a== physical position that craft can return to ( prevent erros from stacking by homing at a known location. )
+// homing reference: a physical position that craft can return to ( prevent erros from stacking by homing at a known location. )
 // 
 Vec3 homePos = {21.6505, 16.3125, 0}; 
 float HOME_LENGTH[4] = {5, 249.1, 260.1, 363.9};  
