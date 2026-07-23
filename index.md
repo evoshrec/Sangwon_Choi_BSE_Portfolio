@@ -35,9 +35,7 @@ I hope to use my experience in BSE as a steppng stone for furtehr projects to co
 
 # Milestone 2
 
-**Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/y3VAmNlER5Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/2x2DsDBf1vU?si=vj4LkfFMlx3s19Fw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 For your second milestone, explain what you've worked on since your previous milestone. You can highlight:
 - Technical details of what you've accomplished and how they contribute to the final goal
@@ -48,10 +46,8 @@ For your second milestone, explain what you've worked on since your previous mil
 Since the first milestone, I have dedicated time to building a second version of the code. Previuosly, the csimulator was only abel to be controlled by the winding and unwinding of the strings. However, with this new code, xyz coordinates can be inputted to mvoe teh paylaod to that exact coordinate. In order to achieve this, the anchor and payload are written into 3D vector objects. Then, the length of each string needed to move the payoad into a specific coordinate are calculated using the distance formula. Then, the motor winds/unwinds the length of string needed, done by calculating the amount of time needed for the mtoor to wind a certain length of the cable and instructing the motor to spin for that exact amount of time ( This is beacsue a continous servo is used; thus, the position of the motor's spin cannot be contorlled nor recordded, hence the alternatvie approach). The main challenge was mastering C++ needed to calculate arduino IDE, as well as learning about different functionsn of the microcontroller such as tracking time through its internal timer. The code constructed so far will be used to complete the thrid milestone, whcih is to build functions for landing, horizontal docking, orbiting, and otehr manuevers.
 
 # Milestone 1
+<iframe width="560" height="315" src="https://www.youtube.com/embed/OZRYlurP_uo?si=ZqtLnEFJhExlRBE7" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-**Don't forget to replace the text below with the embedding for your milestone video. Go to Youtube, click Share -> Embed, and copy and paste the code to replace what's below.**
-
-<iframe width="560" height="315" src="https://youtu.be/2x2DsDBf1vU?si=l2Y38wa921n1CFS6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 
 The project is Spacecraft motion simulator, where a model spacecraft will be attatched to strings, which can be tightened or loosed to control the orientation of the craft in three dimensions. The main components of the project include the PVC frame, motors and circuitry to control the strings with buttons, and 3D printed parts such as the motor housing, the dowel to wrap the tring around, etc. So far, I was able to complete the physical as well as complete the initial versions of the circuitry and code. In addition, I have CADed printed the motor, dowel, and model spacecraft and assemble them together to complete the physcial aspsects of the project. One of the biggest challenges I've faced on  eproject are the relatively slwo production of 3D printed parts that have slowed the process down. In addtition, this has been my first time using an arduino, and I had to learn how to use breadboards, assemble circuits, and code in C++. In the next few days, I plan to build programs to automatically move the spacecraft to diffrent positions across the frame, as well as perform tasks such as docking, landing, and orbiting. Then, I plan to introduce modifications, such as manual joystick control of the aircraft rather then the individaul strings, as well as adding one or two more motors for more axises of control. 
